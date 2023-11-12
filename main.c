@@ -5,43 +5,42 @@
 
 
 int main() {
-    // Declare a local BookClubType variable
+  /*
+  Purpose:   Keep a book club, add books to it and get top rated books.
+    Usage:   Run program, enter value 1, 2, 3 or 0 depending on use, if adding, enter information on book
+  Commands:   Only run program command
+   author:   Nicolas Gorodnitchi
+  */
     BookClubType myBookClub;
 
-    // Initialize the book club structure
     initBookClub(&myBookClub, "My Book Club");
-
-    // Load book data into the book club
     loadBookData(&myBookClub);
-
-    // Variable to store the user's menu choice
+    
     int choice;
 
-    // Main control flow
     do {
-        // Print the main menu
         printMenu(&choice);
 
         // Process user selection
         switch (choice) {
+          
             case 1:
-                // Print all books
+                //all books
                 printBooks(&myBookClub);
                 break;
 
-            case 2:
-                // Print top-rated books
+            case 2: 
+                //top rated
                 printTopRatedBooks(&myBookClub);
                 break;
 
             case 3:
-                // Add a new book
                 {
+                  // Case for adding a new book
                     int id, year;
                     float rating;
                     char title[MAX_STR], authorFirst[MAX_STR], authorLast[MAX_STR];
-
-                    // Prompt user to enter new book data
+                  //Prompt for entering new book data
                     printf("Enter Book ID: ");
                     scanf("%d", &id);
 
@@ -60,9 +59,7 @@ int main() {
                     printf("Enter Rating: ");
                     scanf("%f", &rating);
 
-                    // Add the new book to the book club
                     int result = addBookToClub(&myBookClub, id, title, authorFirst, authorLast, year, rating);
-
                     // Check for errors and notify the user
                     if (result == C_NOK) {
                         printf("Error: Unable to add the book. Please check your input.\n");
@@ -73,17 +70,15 @@ int main() {
                 break;
 
             case 0:
-                // Exit the program
                 printf("Exiting the program. Cleaning up...\n");
+                
                 break;
 
             default:
-                // Invalid choice, prompt for a new selection
                 printf("Invalid option. Please choose a valid menu option.\n");
                 break;
         }
 
-        // Check if the user chose to exit
     } while (choice != 0);
 
     // Clean up the book collection

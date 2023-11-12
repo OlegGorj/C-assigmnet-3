@@ -1,10 +1,18 @@
 #include "defs.h"
 
 
+
+/*
+  Function:  loadBookData
+  Purpose:   Loads pre-defined book data into a BookClubType structure.
+      out:   The BookClubType structure with pre-loaded book data.
+       in:   The BookClubType structure to be initialized.
+   return:   None.
+   side effect: Modifies the book club with pre-defined book data.
+*/
 void loadBookData(BookClubType *club)
 {
   int bookId = 1001;
-
   addBookToClub(club, bookId++, "Ender's Game", "Orson Scott", "Card", 1985, 4.31);
   addBookToClub(club, bookId++, "Dune Messiah", "Frank", "Herbert", 1969, 3.89);
   addBookToClub(club, bookId++, "Dune", "Frank", "Herbert", 1965, 4.26);
@@ -48,4 +56,6 @@ void loadBookData(BookClubType *club)
   addBookToClub(club, bookId++, "Tigana", "Guy Gavriel", "Kay", 1990, 4.09);
   addBookToClub(club, bookId++, "Morning in the Burned House", "Margaret", "Atwood", 1995, 4.12);
   addBookToClub(club, bookId++, "The Seven Deaths of Evelyn Hardcastle", "Stuard", "Turton", 2018, 3.86);
+
+  addBookToClub(club, bookId++, "The Wonderful Wizard of Oz", "Frank", "Baum", 1900, 5.00);
 }
