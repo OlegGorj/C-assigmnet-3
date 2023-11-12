@@ -1,0 +1,31 @@
+# Book Club Management System
+
+
+### Program Author:
+- Author: Nicolas Gorodnitchi
+- Student Number: 101286342
+
+### Purpose
+The Book Club Management System is a program designed to manage a book club's collection. It allows users to view all books in the club, print a list of top-rated books, and add new books to the collection.
+
+### Source Files
+- `main.c`: Contains the main program logic.
+- `club.c`: Defines functions for book club management.
+- `books.c`: Implements functions for managing arrays of books and books.
+- `load.c`: Adds many books for example.
+
+### Header Files
+- `defs.h`: Header file for all source files, contains defs and constants.
+
+
+### Compilation Instructions
+
+To compile the program, use the following command:
+gcc -Wall -o a3 main.c books.c club.c load.c
+Then to run
+./a3
+
+### Use
+Follow instructions presented for choice of function
+
+

@@ -3,95 +3,119 @@
 
 #include "defs.h"
 
-// This will have initBookClub(), addBookToClub(), printBooks(), printTopRatedBooks()
+/*
+  Function:  initBookClub
+  Purpose:   Initializes a BookClubType structure with the provided name.
+      out:   The initialized BookClubType structure.
+       in:   The name for the book club and the club.
+   return:   None.
+   side effect: Copies the provided name to the BookClubType structure and initializes the associated book array.
+*/
+void initBookClub(BookClubType *club, char *name) {
+    // Copy the provided name to the BookClubType structure, ensuring null-termination
+    int _len = strlen(name) + 1;
+    if (_len > MAX_STR) {
+        _len = MAX_STR;
+    }
+    strncpy(club->name, name, _len - 1);  club->name[_len] = '\0';
 
-void initBookClub(BookClubType *club, char *n) {
-    // Initialize the club's name by copying the provided string
-    strncpy(club->name, n, MAX_STR - 1);
-    club->name[MAX_STR - 1] = '\0';
-
-    // Initialize the book array using the existing function initBookArray
-    initBookArray(&(club->books), ORDER_BY_AUTHOR); // You can choose the desired order
+    // Initialize the book array, ordering books by author
+    initBookArray(&(club->books), ORDER_BY_AUTHOR);
 }
 
 
+/*
+  Function:  printBooks
+  Purpose:   Prints all books in a BookClubType structure.
+      out:   Displaying book club info.
+       in:   The BookClubType structure containing books.
+   return:   None.
+   side effect: Displays the book club's name and all the books in the collection.
+*/
 void printBooks(BookClubType *club) {
-    // Print the book club's name
+    // Display the name of the book club
     printf("Book Club: %s\n", club->name);
 
-    // Print all the books in the book club's collection using an existing function
     printBookArray(&(club->books));
 }
 
-void printTopRatedBooks(BookClubType *club) {
-    // Declare temporary book collections
-    BookArrayType allBooks, topRatedBooks;
 
-    // Initialize both temporary book collections
+#if !defined(ARRAY_SIZE)
+    #define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))
+#endif
+
+/*
+  Function:  printTopRatedBooks
+  Purpose:   Prints the top-rated books (20%) from a BookClubType structure.
+      out:   Displays the book club's name and the top-rated books.
+       in:   The BookClubType structure containing books.
+   return:   None.
+   side effect: Displays the book club's name and the top-rated books.
+*/
+void printTopRatedBooks(BookClubType *club) {
+    BookArrayType allBooks, topRatedBooks;
     initBookArray(&allBooks, ORDER_BY_RATING);
     initBookArray(&topRatedBooks, ORDER_BY_RATING);
 
-    // Loop over the given club’s book collection and add each book to the temporary all books collection
-    for (int i = 0; i < club->books.size; i++) {
+    // Copy all books from the book club's collection to the 'allBooks' array
+    for (int i = 0; i < club->books.size-1; i++) {
         addBookToArray(&allBooks, club->books.elements[i]);
     }
 
-    // Compute the number that represents 20% of the total number of books in the club
+    // Determine the number of top-rated books, 20%
     int topRatedCount = (int)(0.2 * allBooks.size);
 
-    // Loop over the temporary all books collection to add only the top-rated books to the temporary top-rated collection
-    for (int i = 0; i < topRatedCount; i++) {
+    for (int i = 0; i < topRatedCount-1; i++) {
         addBookToArray(&topRatedBooks, allBooks.elements[i]);
     }
 
-    // Print out the club’s name and the top-rated books collection
+    // Display the name of the book club and the top-rated books
     printf("Book Club: %s\n", club->name);
     printf("Top Rated Books (20%%):\n");
     printBookArray(&topRatedBooks);
 
-    // Cleanup temporary book collections
-    cleanupBookArray(&allBooks);
+    // Clean up
     cleanupBookArray(&topRatedBooks);
+    cleanupBookArray(&allBooks);
 }
 
 
-
+/*
+  Function:  addBookToClub
+  Purpose:   Adds a new book to a BookClubType structure.
+      out:   C_OK if the book was successfully added, C_NOK otherwise.
+       in:   The BookClubType structure, book details (ID, title, author, year, rating).
+   return:   C_OK on success, C_NOK on failure.
+   side effect: Dynamically allocates memory for a new book, initializes it, and adds it to the book club's collection.
+*/
 int addBookToClub(BookClubType *club, int id, char *t, char *af, char *al, int y, float r) {
-    // (a) Validate id and year as positive numbers
     if (id <= 0 || y <= 0) {
-        return C_NOK; // Invalid id or year
+        return C_NOK;
     }
 
-    // (b) Validate rating to be in the range between 0 and 5, inclusively
     if (r < 0 || r > 5) {
-        return C_NOK; // Invalid rating
+        return C_NOK;
     }
 
-    // (d) Create a single string for the author’s name
-    char author[MAX_STR * 2];  // Assuming MAX_STR is the maximum length for both first and last names
+    // Concatenate author's name
+    char author[MAX_STR * 2];
     sprintf(author, "%s, %s", al, af);
 
-    // (e) Dynamically allocate memory for a new book and initialize it
     BookType *newBook = (BookType *)calloc(1, sizeof(BookType));
     if (newBook == NULL) {
         fprintf(stderr, "Memory allocation failed for BookType.\n");
-        return C_NOK; // Memory allocation failed
+        return C_NOK;
     }
 
-    // Initialize the new book using the existing function
     initBook(newBook, id, t, author, y, r);
-
-    // (f) Add the new book to the book club’s collection using an existing function
     int result = addBookToArray(&(club->books), newBook);
 
-    // (g) Return an error flag if the book could not be added to the collection
+    // Check for errors in adding
     if (result == C_NOK) {
-        free(newBook); // Cleanup allocated memory in case of failure
-        return C_NOK;  // Unable to add the book to the collection
+        free(newBook);
+        return C_NOK;
     }
 
-
     free(newBook);
-    return C_OK; // Success
+    return C_OK;
 }
-

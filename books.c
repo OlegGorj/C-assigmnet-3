@@ -3,133 +3,173 @@
 
 #include "defs.h"
 
-//This will have initBook(), initBookArray(), addBookToArray(), findInsPt(), printBook(), printBookArray(), cleanupBookArray()
-
-void initBookArray(BookArrayType* arr, OrderType o) {
-    // Initialize the size of the collection to zero
+/*
+  Function:  initBookArray
+  Purpose:   Initializes a BookArrayType structure with a specified order.
+      out:   The initialized BookArrayType structure.
+       in:   The BookArrayType structure and the desired order (ORDER_BY_AUTHOR or ORDER_BY_RATING).
+   return:   None.
+   side effect: Initializes the size, order, and allocates memory for the book array.
+*/
+void initBookArray(BookArrayType* arr, OrderType order) {
+    // Initialize size, order, and allocate memory for the book array
     arr->size = 0;
+    arr->order = order;
 
-    // Initialize the ordering of books in the array to the given parameter
-    arr->order = o;
-
-    // Use calloc to initialize the elements (book pointers) in the array to NULL
-    arr->elements[0] = (BookType*)calloc(MAX_CAP, sizeof(BookType*));
-    if (arr->elements[0] == NULL) {
-      fprintf(stderr, "Memory allocation failed for BookArrayType.\n");
-      exit(EXIT_FAILURE);
-    }
+    // allocate MAX_CAP structs of type BookType
+    // for (int i = 0; i < MAX_CAP; i++){
+    //     arr->elements[i] = (BookType*)malloc(sizeof(BookType));
+    //     if (arr->elements[i] == NULL) {
+    //         fprintf(stderr, "Memory allocation failed for BookArrayType.\n");
+    //         exit(EXIT_FAILURE);
+    //     }
+    // }
 }
 
-void initBook(BookType* b, int id, char* t, char* a, int y, float r) {
-    // Set the fields of the BookType structure based on the provided parameters
-    b->id = id;
+/*
+  Function:  initBook
+  Purpose:   Initializes a BookType structure with the provided details.
+      out:   The initialized BookType structure.
+       in:   The BookType structure and book details (ID, title, author, year, rating).
+   return:   None.
+   side effect: Sets the fields of the BookType structure based on the provided parameters.
+*/
+void initBook(BookType* book, int id, char* title, char* author, int year, float rating) {
+    // Assumption: input parameter "book" mush be initialized prior
 
-    // Use calloc to ensure that the title and author fields are null-terminated
-    b->title[0] = '\0';
-    b->author[0] = '\0';
-
-    // Copy the title to the title field, ensuring it doesn't exceed the maximum length
-    strncpy(b->title, t, MAX_STR - 1);
-
-    // Copy the author to the author field, ensuring it doesn't exceed the maximum length
-    strncpy(b->author, a, MAX_STR - 1);
-
-    b->year = y;
-    b->rating = r;
+    // Set fields of the BookType structure based on the provided parameters
+    book->id = id;
+    strncpy(book->title, title, MAX_STR - 1);
+    strncpy(book->author, author, MAX_STR - 1);
+    book->year = year;
+    book->rating = rating;
 }
 
-
+/*
+  Function:  findInsPt
+  Purpose:   Finds the insertion point for a book in a BookArrayType structure based on its order.
+      out:   The insertion point for the book.
+       in:   The BookArrayType structure, the book to be inserted, and a pointer to store the insertion point.
+   return:   C_OK on success, C_NOK if the array is full.
+   side effect: Modifies the insPt parameter to store the insertion point.
+*/
 int findInsPt(BookArrayType *arr, BookType *b, int *insPt) {
-    
-
     // Check if the array is full
     if (arr->size >= MAX_CAP) {
-        return C_NOK; // Array is full, cannot insert more books
+        return C_NOK;
     }
 
     int i = 0;
-    
+   
+    // Determine insertion point based on the order (by author or by rating)
     if (arr->order == ORDER_BY_AUTHOR) {
-        // Find the insertion point in ascending alphabetical order by author
         while (i < arr->size && strcmp(arr->elements[i]->author, b->author) < 0) {
             i++;
         }
 
-        // Handle books by the same author ordered by title, making sure stays at same author and only compares titles
         while (i < arr->size && strcmp(arr->elements[i]->author, b->author) == 0 && strcmp(arr->elements[i]->title, b->title) < 0) {
             i++;
         }
-
     } else if (arr->order == ORDER_BY_RATING) {
-        // Find the insertion point in descending numerical order by rating
         while (i < arr->size && arr->elements[i]->rating > b->rating) {
             i++;
         }
     }
 
-    *insPt = i; // Set the insertion point
-    return C_OK; // Success
+    // Store the insertion point
+    *insPt = i;
+    return C_OK;
 }
 
+/*
+  Function:  addBookToArray
+  Purpose:   Adds a new book to a BookArrayType structure.
+      out:   C_OK if the book was successfully added, ERROR_FLAG otherwise.
+       in:   The BookArrayType structure and the book to be added.
+   return:   C_OK on success, ERROR_FLAG on failure.
+   side effect: Dynamically allocates memory for a new book, initializes it, and adds it to the book array.
+*/
 int addBookToArray(BookArrayType* arr, BookType* b) {
-    // Error flag constant
     const int ERROR_FLAG = -1;
 
-    // Check if there is room in the array for the new book
+    // Check if the array is full
     if (arr->size >= MAX_CAP) {
-        return ERROR_FLAG; // Array is full, cannot add more books
+        printf("Error: can not add any more books - array is full");
+        return ERROR_FLAG;
     }
 
     int insPt;
-
-    // Find the insertion point using the existing function
+    // Find the insertion point for the new book
     int result = findInsPt(arr, b, &insPt);
 
     // Check for errors in finding the insertion point
     if (result == ERROR_FLAG) {
-        return ERROR_FLAG; // Unable to find insertion point, return error flag
+        return ERROR_FLAG;
     }
 
-    // Move each element one position towards the back of the array
+    // Shift elements to make room for the new book
     for (int i = arr->size; i > insPt; i--) {
         arr->elements[i] = arr->elements[i - 1];
     }
 
-    // Allocate memory for the new book and copy the data
-    arr->elements[insPt] = (BookType*)calloc(1, sizeof(BookType));
+    // Allocate memory for the new book
+    arr->elements[insPt] = (BookType*)malloc(sizeof(BookType));
     if (arr->elements[insPt] == NULL) {
-        return ERROR_FLAG; // Memory allocation failed, return error flag
+        return ERROR_FLAG;
     }
 
-    // Copy the book data into the newly allocated memory
+    // Initialize the new book with the provided details
     initBook(arr->elements[insPt], b->id, b->title, b->author, b->year, b->rating);
 
-    // Increase the size of the array
+    // Increment the size of the array
     arr->size++;
-
-    return C_OK; // Success
+    return C_OK;
 }
 
+/*
+  Function:  printBook
+  Purpose:   Prints the details of a book.
+      out:   None.
+       in:   The BookType structure representing the book.
+   return:   None.
+   side effect: Displays the book data with aligned formatting.
+*/
 void printBook(BookType *b) {
     // Print book data with aligned formatting
     printf("%4d  %-30s  %-20s  %4d  %5.2f\n", b->id, b->title, b->author, b->year, b->rating);
 }
 
+/*
+  Function:  printBookArray
+  Purpose:   Prints all books in a BookArrayType structure.
+      out:   None.
+       in:   The BookArrayType structure containing books.
+   return:   None.
+   side effect: Displays the book array with column names and details.
+*/
 void printBookArray(BookArrayType *arr) {
     // Print header with column names
-    printf("%-5s  %-30s  %-20s  %-4s  %-5s\n", "ID", "Title", "Author", "Year", "Rating");
+    // printf("%-5s  %-30s  %-20s  %-4s  %-5s\n", "ID", "Title", "Author", "Year", "Rating");
+    printf("%-5s\n", "ID");
 
-    // Print each book in the array using printBook function
-    for (int i = 0; i < arr->size; i++) {
+    for (int i = 0; i < arr->size-1; i++) {
         printBook(arr->elements[i]);
     }
 }
 
-
+/*
+  Function:  cleanupBookArray
+  Purpose:   Frees the memory allocated for each book in a BookArrayType structure.
+      out:   None.
+       in:   The BookArrayType structure to be cleaned up.
+   return:   None.
+   side effect: Frees the memory allocated for each book and resets the size to zero.
+*/
 void cleanupBookArray(BookArrayType *arr) {
-    // Free the memory allocated for each book
+    // Free memory
     for (int i = 0; i < arr->size; i++) {
         free(arr->elements[i]);
+        arr->elements[i] = NULL;
     }
 
     // Reset the size to zero
