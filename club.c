@@ -101,17 +101,15 @@ int addBookToClub(BookClubType *club, int id, char *t, char *af, char *al, int y
     char author[MAX_STR * 2];
     sprintf(author, "%s, %s", al, af);
 
-    BookType *newBook = (BookType *)calloc(1, sizeof(BookType));
+    BookType *newBook = (BookType *)malloc(sizeof(BookType));
     if (newBook == NULL) {
         fprintf(stderr, "Memory allocation failed for BookType.\n");
         return C_NOK;
     }
 
     initBook(newBook, id, t, author, y, r);
-    int result = addBookToArray(&(club->books), newBook);
-
     // Check for errors in adding
-    if (result == C_NOK) {
+    if (addBookToArray(&(club->books), newBook) == C_NOK) {
         free(newBook);
         return C_NOK;
     }
